@@ -8,7 +8,7 @@ COMPANY_CHOICES = [
     ("GMS Composite", "GMS Composite"),
     ("GMS Textile", "GMS Textile"),
     ("GMS Trims", "GMS Trims"),
-    ("GMS Testing Laboratory", "GMS Testing Laboratory"),
+    ("GMS Testing Laboratory", "GMS Testing Laboratory")
 ]
 
 MODULE_CHOICES = [

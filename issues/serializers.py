@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Issue
-from accounts.models import User 
 
 class IssueSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,30 +14,17 @@ class IssueSerializer(serializers.ModelSerializer):
                 data[k] = None
         return super().to_internal_value(data)
 
-    # Automatically set inserted_by from logged-in user
+    # create: set inserted_by from request, fill MIS responsible_person if missing
     def create(self, validated_data):
-        user = self.context['request'].user  # logged-in user
+        user = self.context['request'].user
         validated_data['inserted_by'] = user
-
-        # If MIS and responsible_person missing, fill with username
         if validated_data.get("responsible_party") == "MIS" and not validated_data.get("responsible_person"):
-            validated_data["responsible_person"] = user.get_username()
-
+            validated_data["responsible_person"] = user.name  # use display name
         return super().create(validated_data)
 
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "user_id", "name", "company_name", "modules", "password"]
-        extra_kwargs = {
-            "password": {"write_only": True}
-        }
-
-    def create(self, validated_data):
-        password = validated_data.pop("password", None)
-        user = User(**validated_data)
-        if password:
-            user.set_password(password)
-        user.save()
-        return user
+    # update: same MIS autofill logic
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        if validated_data.get("responsible_party") == "MIS" and not validated_data.get("responsible_person"):
+            validated_data["responsible_person"] = user.name
+        return super().update(instance, validated_data)
