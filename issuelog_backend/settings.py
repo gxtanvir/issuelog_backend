@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-b5&=@m3o#yl$c0qc%f!()%@7f^j)0w_q)^b%i1gqjzw=i3wyz_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.101.243.82']
 
 
 # Application definition
@@ -92,12 +92,30 @@ WSGI_APPLICATION = 'issuelog_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'mssql',
+        'NAME': 'issue_log',     # your database name
+        'USER': 'tanvir',
+        'PASSWORD': 'Tanvir17',
+        'HOST': 'localhost\\SQLEXPRESS',  # double backslash
+        'PORT': '',  # leave blank when using named instance
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'extra_params': 'TrustServerCertificate=yes;',
+        },
     }
 }
+
+
+
 
 
 # Password validation

@@ -23,7 +23,7 @@ class User(AbstractUser):
     companies = models.JSONField(default=list, blank=True)
     modules = models.JSONField(default=list, blank=True)
 
-    USERNAME_FIELD = "user_id"   # 👈 login field
+    USERNAME_FIELD = "user_id"   
     REQUIRED_FIELDS = ["name"]
 
     objects = UserManager()

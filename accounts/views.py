@@ -3,6 +3,7 @@ from .models import User
 from .serializers import UserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
 
 # Register API
 class RegisterView(generics.CreateAPIView):
@@ -10,6 +11,6 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
 
-# Login API (JWT)
 class LoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
     permission_classes = (AllowAny,)
