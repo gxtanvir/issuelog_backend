@@ -1,9 +1,27 @@
 from rest_framework import serializers
-from django.contrib.auth import authenticate
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import User
+from .models import User, Company, Module
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ["id", "name"]
+
+
+class ModuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Module
+        fields = ["id", "name"]
+
 
 class UserSerializer(serializers.ModelSerializer):
+    companies = serializers.PrimaryKeyRelatedField(
+        queryset=Company.objects.all(), many=True
+    )
+    modules = serializers.PrimaryKeyRelatedField(
+        queryset=Module.objects.all(), many=True
+    )
+
     class Meta:
         model = User
         fields = ["id", "user_id", "name", "password", "companies", "modules"]
@@ -12,27 +30,57 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        companies = validated_data.pop("companies", [])
+        modules = validated_data.pop("modules", [])
         password = validated_data.pop("password", None)
+
         user = User(**validated_data)
         if password:
             user.set_password(password)
         user.save()
+
+        # assign companies & modules
+        user.companies.set(companies)
+        user.modules.set(modules)
         return user
 
+    def update(self, instance, validated_data):
+        companies = validated_data.pop("companies", None)
+        modules = validated_data.pop("modules", None)
 
-# 🔹 Custom login serializer
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
+        for attr, value in validated_data.items():
+            if attr == "password":
+                instance.set_password(value)
+            else:
+                setattr(instance, attr, value)
+        instance.save()
 
-        # Add user details to response
-        user = self.user
-        data["user"] = {
-            "id": user.id,
-            "user_id": user.user_id,
-            "name": user.name,
-            "companies": user.companies,
-            "modules": user.modules,
-        }
+        if companies is not None:
+            instance.companies.set(companies)
+        if modules is not None:
+            instance.modules.set(modules)
 
-        return data
+        return instance
+
+class UserSignupSerializer(serializers.ModelSerializer):
+    companies = serializers.PrimaryKeyRelatedField(
+        queryset=Company.objects.all(), many=True
+    )
+    modules = serializers.PrimaryKeyRelatedField(
+        queryset=Module.objects.all(), many=True
+    )
+
+    class Meta:
+        model = User
+        fields = ["user_id", "name", "password", "companies", "modules"]   # ✅ correct
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def create(self, validated_data):
+        companies = validated_data.pop("companies", [])
+        modules = validated_data.pop("modules", [])
+        password = validated_data.pop("password")
+
+        user = User.objects.create_user(password=password, **validated_data)
+        user.companies.set(companies)
+        user.modules.set(modules)
+        return user

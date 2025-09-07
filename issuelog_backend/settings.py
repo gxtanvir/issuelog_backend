@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-b5&=@m3o#yl$c0qc%f!()%@7f^j)0w_q)^b%i1gqjzw=i3wyz_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.101.243.82']
+ALLOWED_HOSTS = ['gxtanvir.pythonanywhere.com']
 
 
 # Application definition
@@ -102,11 +103,11 @@ WSGI_APPLICATION = 'issuelog_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'issue_log',     # your database name
+        'NAME': 'issue_log',
         'USER': 'tanvir',
         'PASSWORD': 'Tanvir17',
-        'HOST': 'localhost\\SQLEXPRESS',  # double backslash
-        'PORT': '',  # leave blank when using named instance
+        'HOST': 'localhost\\SQLEXPRESS',
+        'PORT': '', 
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
             'extra_params': 'TrustServerCertificate=yes;',
@@ -158,3 +159,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=3650),
+    
+}
