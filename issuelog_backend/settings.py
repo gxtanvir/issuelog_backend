@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-b5&=@m3o#yl$c0qc%f!()%@7f^j)0w_q)^b%i1gqjzw=i3wyz_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['gxtanvir.pythonanywhere.com']
+ALLOWED_HOSTS = ['172.25.12.134']
 
 
 # Application definition
@@ -93,27 +93,27 @@ WSGI_APPLICATION = 'issuelog_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'issue_log',
-        'USER': 'tanvir',
-        'PASSWORD': 'Tanvir17',
-        'HOST': 'localhost\\SQLEXPRESS',
-        'PORT': '', 
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'extra_params': 'TrustServerCertificate=yes;',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'issue_log',
+#         'USER': 'tanvir',
+#         'PASSWORD': 'Tanvir17',
+#         'HOST': 'localhost\\SQLEXPRESS',
+#         'PORT': '', 
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 17 for SQL Server',
+#             'extra_params': 'TrustServerCertificate=yes;',
+#         },
+#     }
+# }
 
 
 
@@ -154,6 +154,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
