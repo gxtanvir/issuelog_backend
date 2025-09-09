@@ -14,10 +14,12 @@ from .serializers import (
     UserSignupSerializer,
 )
 
+
 class CompanyListView(generics.ListAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = [permissions.AllowAny]
+
 
 class ModuleListView(generics.ListAPIView):
     queryset = Module.objects.all()
@@ -30,6 +32,7 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = UserSignupSerializer
     permission_classes = [permissions.AllowAny]
 
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def me(request):
@@ -40,6 +43,8 @@ def me(request):
         "name": user.name,
         "companies": [c.name for c in user.companies.all()],
         "modules": [m.name for m in user.modules.all()],
+        "is_staff": user.is_staff,
+        "is_superuser": user.is_superuser,
     })
 
 
@@ -55,10 +60,16 @@ class LoginView(APIView):
 
         if user is not None:
             refresh = RefreshToken.for_user(user)
+            user_data = UserSerializer(user).data
+
+            # add admin flags to response
+            user_data["is_staff"] = user.is_staff
+            user_data["is_superuser"] = user.is_superuser
+
             return Response({
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
-                "user": UserSerializer(user).data
+                "user": user_data
             }, status=status.HTTP_200_OK)
 
         return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
