@@ -17,7 +17,7 @@ class Module(models.Model):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, user_id, name, password=None, **extra_fields):
+    def create_user(self, user_id, name, email, password=None, **extra_fields):
         if not user_id:
             raise ValueError("User must have a user_id")
         user = self.model(user_id=user_id, name=name, **extra_fields)

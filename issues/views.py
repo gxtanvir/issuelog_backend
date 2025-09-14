@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from .models import Issue
 from .serializers import IssueSerializer
 from .permissions import IsOwnerOrReadOnly
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Max
 from django.utils.timezone import now
-from accounts.models import User  # ✅ use custom user from accounts app
+from accounts.models import User 
 
 
 class IssueViewSet(viewsets.ModelViewSet):
@@ -45,18 +45,29 @@ class IssueViewSet(viewsets.ModelViewSet):
         Admin: Get monthly summary of issues per user
         Example: GET /api/issues/summary/
         """
+        from django.utils.timezone import now
+        from datetime import date
         today = now().date()
-        first_day = today.replace(day=1)
+        year = int(request.query_params.get("year", today.year))
+        month = int(request.query_params.get("month", today.month))
+
+        # Get first and last day of the selected month
+        first_day = date(year, month, 1)
+        if month == 12:
+            last_day = date(year + 1, 1, 1)
+        else:
+            last_day = date(year, month + 1, 1)
 
         summary = (
-            Issue.objects.filter(created_at__gte=first_day)
-            .values("inserted_by__user_id", "inserted_by__name")
-            .annotate(
-                pending=Count("issue_id", filter=Q(gms_status="Pending")),
-                solved=Count("issue_id", filter=Q(gms_status="Completed")),
-                total=Count("issue_id"),
-            )
+        Issue.objects.filter(created_at__gte=first_day, created_at__lt=last_day)
+        .values("inserted_by__user_id", "inserted_by__name")
+        .annotate(
+            pending=Count("issue_id", filter=Q(gms_status="Pending")),
+            solved=Count("issue_id", filter=Q(gms_status="Completed")),
+            total=Count("issue_id"),
+            last_update=Max("updated_at"),
         )
+    )
 
         formatted = [
             {
@@ -65,9 +76,14 @@ class IssueViewSet(viewsets.ModelViewSet):
                 "pending": item["pending"],
                 "solved": item["solved"],
                 "total": item["total"],
+                "last_update" : item["last_update"],
             }
             for item in summary
         ]
+        # Convert datetime objects to local time
+        for item in summary:
+            if item["last_update"]:
+                item["last_update"] = item["last_update"].strftime("%Y-%m-%d %H:%M:%S")
 
         return Response(formatted)
 

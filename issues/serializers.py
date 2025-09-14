@@ -5,7 +5,7 @@ class IssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issue
         fields = "__all__"
-        read_only_fields = ["inserted_by", "inserted_by_name", "created_at", "issue_id"]
+        read_only_fields = ["inserted_by", "inserted_by_name", "created_at", "issue_id", "updated_at"]
 
     # Accept empty strings as null for optional fields
     def to_internal_value(self, data):

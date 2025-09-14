@@ -54,6 +54,7 @@ class Issue(models.Model):
     inserted_by_name = models.CharField(max_length=150, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         if self.inserted_by and not self.inserted_by_name:
