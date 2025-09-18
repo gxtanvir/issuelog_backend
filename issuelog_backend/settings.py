@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-b5&=@m3o#yl$c0qc%f!()%@7f^j)0w_q)^b%i1gqjzw=i3wyz_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['172.25.10.65']
+ALLOWED_HOSTS = ['172.25.12.159']
 
 
 # Application definition
@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'issues',
+    'notifications',
+    'django_crontab',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -167,3 +169,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=3650),
     
 }
+
+CRONJOBS = [
+    ('0 10 * * *', 'django.core.management.call_command', ['generate_daily_notifications']),
+]

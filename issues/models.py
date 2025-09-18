@@ -39,6 +39,7 @@ class Issue(models.Model):
     gms_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     issue_raise_date = models.DateField()
     deadline = models.DateField(null=True, blank=True)
+    crm = models.CharField(max_length=255, null=True, blank=True)
     complete_date = models.DateField(null=True, blank=True)
     comment_date = models.DateField(null=True, blank=True)
     comments = models.TextField(null=True, blank=True)

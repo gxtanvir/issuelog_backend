@@ -13,6 +13,16 @@ class IssueSerializer(serializers.ModelSerializer):
             if data.get(k) in ["", None]:
                 data[k] = None
         return super().to_internal_value(data)
+    
+    def validate(self, data):
+        deadline = data.get("deadline")
+        crm = data.get("crm")
+
+        if deadline and not crm:
+            raise serializers.ValidationError(
+                {"crm": "CRM is required if deadline is set."}
+            )
+        return data
 
     # create: set inserted_by from request, fill MIS responsible_person if missing
     def create(self, validated_data):
