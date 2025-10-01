@@ -24,7 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "user_id", "name", "password", "companies", "modules", "is_staff",
+        fields = ["id", "user_id", "name", "email", "password", "companies", "modules", "is_staff",
             "is_superuser", ]
         extra_kwargs = {
             "password": {"write_only": True}
@@ -73,7 +73,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["user_id", "name", "password", "companies", "modules",
+        fields = ["user_id", "name", "email", "password", "companies", "modules",
             "is_superuser"]
         extra_kwargs = {"password": {"write_only": True}}
 
@@ -86,3 +86,15 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.companies.set(companies)
         user.modules.set(modules)
         return user
+    
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class PasswordVerifyCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField()

@@ -1,11 +1,12 @@
 from rest_framework import viewsets, permissions
-from rest_framework.decorators import action
+from rest_framework.decorators import action,api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
 from .models import Issue
 from .serializers import IssueSerializer
 from .permissions import IsOwnerOrReadOnly
 from django.db.models import Count, Q, Max
-from django.utils.timezone import now
+from django.utils.timezone import now, timedelta, timezone
 from accounts.models import User 
 
 
@@ -99,10 +100,29 @@ class IssueViewSet(viewsets.ModelViewSet):
         Example: GET /api/issues/user/MIS-18/
         """
         try:
-            user = User.objects.get(user_id=user_id)  # 👈 use user_id, not id
+            user = User.objects.get(user_id=user_id)
         except User.DoesNotExist:
             return Response({"detail": f"User '{user_id}' not found"}, status=404)
 
         issues = Issue.objects.filter(inserted_by=user).order_by("-created_at")
+        serializer = self.get_serializer(issues, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAdminUser])
+    def upcoming_deadline_issues(self, request):
+        today = now().date()
+
+        # Get "days" param from query, default = 7
+        try:
+            days = int(request.query_params.get("days", 7))
+        except ValueError:
+            days = 7  # fallback if invalid param
+
+        end_date = today + timedelta(days=days)
+
+        issues = Issue.objects.filter(
+            deadline__range=[today, end_date]
+        ).order_by("deadline")
+
         serializer = self.get_serializer(issues, many=True)
         return Response(serializer.data)

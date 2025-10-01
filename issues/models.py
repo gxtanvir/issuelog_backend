@@ -7,12 +7,6 @@ PRIORITY_CHOICES = [
     ("Regular", "Regular"),
 ]
 
-MODULE_CHOICES = [
-    ("MM", "MM"), ("TNA", "TNA"), ("Plan", "Plan"), ("Commercial", "Commercial"),
-    ("SCM", "SCM"), ("Inventory", "Inventory"), ("Prod", "Prod"),
-    ("S.Con", "S.Con"), ("Printing", "Printing"), ("AOP", "AOP"),
-    ("Wash", "Wash"), ("Embroidery", "Embroidery"), ("Laboratory", "Laboratory"),
-]
 
 VIA_CHOICES = [
     ("Phone", "Phone"), ("Email", "Email"), ("Direct", "Direct"),

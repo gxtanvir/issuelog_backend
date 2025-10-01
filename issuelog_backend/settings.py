@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-b5&=@m3o#yl$c0qc%f!()%@7f^j)0w_q)^b%i1gqjzw=i3wyz_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['172.25.12.159']
+ALLOWED_HOSTS = ['10.128.175.82']
 
 
 # Application definition
@@ -173,3 +173,6 @@ SIMPLE_JWT = {
 CRONJOBS = [
     ('0 10 * * *', 'django.core.management.call_command', ['generate_daily_notifications']),
 ]
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@example.com"

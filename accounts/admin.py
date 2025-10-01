@@ -6,11 +6,11 @@ from .models import User, Company, Module
 class UserAdmin(BaseUserAdmin):
     model = User
 
-    list_display = ("user_id", "name", "is_staff", "is_active")
+    list_display = ("user_id", "name", "email", "is_staff", "is_active")
     list_filter = ("is_staff", "is_superuser", "is_active")
 
     fieldsets = (
-        (None, {"fields": ("user_id", "name", "password")}),
+        (None, {"fields": ("user_id", "name", "email", "password")}),
         # ("Profile Info", {"fields": ("companies", "modules")}),
         ("Permissions", {"fields": ("is_staff", "is_superuser", "is_active", "groups", "user_permissions")}),
         ("Important dates", {"fields": ("last_login",)}),
@@ -22,9 +22,9 @@ class UserAdmin(BaseUserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("user_id", "name", "password1", "password2", "companies", "modules", "is_staff", "is_active"),
+                "fields": ("user_id", "name", "email", "password1", "password2", "companies", "modules", "is_staff", "is_active"),
             },
-        ),
+        ), 
     )
 
     search_fields = ("user_id", "name")

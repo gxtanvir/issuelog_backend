@@ -6,7 +6,11 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User, Company, Module
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.conf import settings
+from django.core.mail import send_mail
+from .models import User, PasswordResetCode
+from.serializers import PasswordResetRequestSerializer, PasswordVerifyCodeSerializer, PasswordResetConfirmSerializer
 from .serializers import (
     UserSerializer,
     CompanySerializer,
@@ -41,6 +45,7 @@ def me(request):
         "id": user.id,
         "user_id": user.user_id,
         "name": user.name,
+        "email": user.email,
         "companies": [c.name for c in user.companies.all()],
         "modules": [m.name for m in user.modules.all()],
         "is_staff": user.is_staff,
@@ -73,3 +78,86 @@ class LoginView(APIView):
             }, status=status.HTTP_200_OK)
 
         return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "No user found with this email"}, status=status.HTTP_404_NOT_FOUND)
+
+        # generate and save code
+        code = PasswordResetCode.generate_code()
+        PasswordResetCode.objects.create(user=user, code=code)
+
+        # send email
+        send_mail(
+            "Your Password Reset Code",
+            f"Use this code to reset your password: {code}\n(valid for 10 minutes)",
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+        )
+
+        return Response({"success": "Reset code sent to email"}, status=status.HTTP_200_OK)
+
+
+class PasswordVerifyCodeView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordVerifyCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        code = serializer.validated_data["code"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "Invalid email"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            reset_obj = PasswordResetCode.objects.filter(user=user, code=code).latest("created_at")
+        except PasswordResetCode.DoesNotExist:
+            return Response({"error": "Invalid code"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if reset_obj.is_expired():
+            return Response({"error": "Code expired"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"success": "Code is valid"}, status=status.HTTP_200_OK)
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        code = serializer.validated_data["code"]
+        new_password = serializer.validated_data["new_password"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "Invalid email"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            reset_obj = PasswordResetCode.objects.filter(user=user, code=code).latest("created_at")
+        except PasswordResetCode.DoesNotExist:
+            return Response({"error": "Invalid code"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if reset_obj.is_expired():
+            return Response({"error": "Code expired"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response({"success": "Password reset successfully"}, status=status.HTTP_200_OK)
